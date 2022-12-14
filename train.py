@@ -10,33 +10,34 @@ from utils.callbacks import LogImages
 parser = argparse.ArgumentParser(prog="Training script",
                                  description="Script for training models on different architectures")
 
-parser.add_argument("batch_size", type=int, default=32,
+parser.add_argument('--batch_size', type=int, default=32,
                     help="number of images to be passed to the network for training one mini_batch")
-parser.add_argument('epochs', type=int, default=50,
+parser.add_argument('--epochs', type=int, default=50,
                     help="number of epochs for which model is to be trained")
-parser.add_argument('learning_rate', type=float, default=0.0002,
+parser.add_argument('--learning_rate', type=float, default=0.0002,
                     help="learning rate for adam optimizer")
-parser.add_argument('beta_1', type=float, default=0.5,
+parser.add_argument('--beta_1', type=float, default=0.5,
                     help="beta_1 value for Adam optimizer")
-parser.add_argument('beta_2', type=float, default=0.999,
+parser.add_argument('--beta_2', type=float, default=0.999,
                     help="beta_2 value for Adam optimizer")
-parser.add_argument('data_dir', type=str, default='images/',
+parser.add_argument('--data_dir', type=str, default='images/',
                     help="relative path of the directory having HR images on which models are to be trained on")
 
-parser.add_argument('network', type=str, default='SRResNet', choices=['SRGAN', 'SRResNet'],
+parser.add_argument('--network', type=str, default='SRResNet', choices=['SRGAN', 'SRResNet'],
                     help='type of network, whether to train SRGAN or SRResNet')
-parser.add_argument('patch', type=bool, default=True,
+parser.add_argument('--patch', type=bool, default=True,
                     help="specify whether to use a patch discriminator")
-parser.add_argument('concat', type=bool, default=True,
+parser.add_argument('--concat', type=bool, default=True,
                     help="specify whether to feed a concatenated input to discriminator")
-parser.add_argument('pretrain_gen', type=str,
+parser.add_argument('--pretrain_gen', type=str,
                     help="name of pretrained generator to be used for training SRGAN")
-parser.add_argument('checkpoint', type=str, default=None,
+parser.add_argument('--checkpoint', type=str, default=None,
                     help='checkpoint, if any, to be used to restart training')
-parser.add_argument('model_dir', type=str, default="models/",
+parser.add_argument('--model_dir', type=str, default="models/",
                     help="directory where trained models are to be saved")
-parser.add_argument('save_best', type=int, default=2,
+parser.add_argument('--save_best', type=int, default=2,
                     help='number of k best models to save')
+
 
 args = parser.parse_args()
 

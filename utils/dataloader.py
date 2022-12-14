@@ -8,7 +8,10 @@ from torchvision.transforms import Resize, ToTensor
 from torch.utils.data import Dataset, DataLoader, random_split
 from pytorch_lightning import LightningDataModule
 import requests
-
+import matplotlib.pyplot as plt
+import numpy as np
+from torchvision.utils import save_image
+import torchvision
 
 def recursiveResize(img: Image, factor: int = 2):
     """
@@ -42,14 +45,18 @@ class SRDataset(Dataset):
     def __len__(self):
         return len(self.filenames)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index, save = False):
         img = Image.open(os.path.join(self.img_dir, self.filenames[index]))
+        # print(np.shape(img))
         img = self.setSize(img)
         lr_img = recursiveResize(img, 2)
         hr_img = img
         interpolated_img = self.setSize(lr_img)
+        # if save:
+        #     interpolated_img.save(f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
         lr_img, hr_img, interpolated_img = self.toTensor(
             lr_img), self.toTensor(hr_img), self.toTensor(interpolated_img)
+        # interpolated_img = interpolated_img.reshape(128,128,3)
         return lr_img, hr_img, interpolated_img
 
 
@@ -61,9 +68,11 @@ class SRDataLoader(LightningDataModule):
 
         self.data_dir = Path(data_dir)
         self.train_dir = Path(os.getcwd(), self.data_dir, 'train')
-        self.test_dir = Path(os.getcwd(), self.data_dir, 'test')
+        self.test_dir = Path(os.getcwd(), self.data_dir, 'lr_test')
+        self.val_dir = Path(os.getcwd(), self.data_dir, 'val')
         self.train_dir.mkdir(parents=True, exist_ok=True)
         self.test_dir.mkdir(parents=True, exist_ok=True)
+        self.val_dir.mkdir(parents=True, exist_ok=True)
 
         self.img_size = 128
         self.train, self.val, self.test = None, None, None
@@ -90,12 +99,33 @@ class SRDataLoader(LightningDataModule):
 
     def setup(self, stage=None):
         if stage == "fit":
-            self.train, self.val = random_split(
-                SRDataset(data_dir=self.train_dir, img_size=self.img_size), lengths=[180000, 2059],
-                generator=torch.Generator().manual_seed(0))
+            # print("\n\n\n",len(SRDataset(data_dir=self.train_dir, img_size=self.img_size)),"\n\n\n","self.train_dir = ",self.train_dir,"\n\n\n")
+            # self.train, self.val = random_split(
+            #     SRDataset(data_dir=self.train_dir, img_size=self.img_size), lengths=[180000, 2059],
+            #     generator=torch.Generator().manual_seed(0))
+            self.train, self.val = SRDataset(data_dir=self.train_dir,img_size=self.img_size), SRDataset(data_dir=self.val_dir,img_size=self.img_size)
+            # lr_tensor_img = self.train.__getitem__(0)[0]
+            # hr_tensor_img = self.train.__getitem__(0)[1]
+            # interpolated_tensor_img = self.train.__getitem__(0)[2]
+
+            # plt.imshow(lr_tensor_img[0])
+            # plt.imshow(hr_tensor_img[0])
+            # plt.imshow(interpolated_tensor_img[0])
+            print('len of train : ',len(self.train),' len of val : ',len(self.val))
         elif stage == 'test':
             self.test = SRDataset(data_dir=self.test_dir,
                                   img_size=self.img_size)
+            # # print(len(self.test))
+            # for index in range(len(self.test)):
+            #     save = self.test.__getitem__(index,save = True)
+                # interpolated_tensor_img = self.test.__getitem__(index)[2][0]
+                # save_image(interpolated_tensor_img, f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
+            # for index,test_img in enumerate(self.test):
+            #     print(index, test_img.__getitem__(index)[2])
+            #     interpolated_tensor_img = test_img.__getitem__(index)[2]
+            #     plt.imshow(interpolated_tensor_img[0])
+            #     # interpolated_tensor_img.save(f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
+            #     save_image(interpolated_tensor_img, f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
 
     def train_dataloader(self, *args, **kwargs):
         return DataLoader(self.train, batch_size=self.batch_size, num_workers=4, drop_last=True,
