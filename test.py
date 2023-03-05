@@ -33,22 +33,24 @@ def load_images_from_folder(folder):
             print(f"Loaded image: {filename}")
     return images
 
-def calc_snr_ssim(pred,hr_img):
-    psnr = PSNR(pred, hr_img)
+def calc_snr(pred,hr_img):
+    psnr = PSNR(np.array(pred), np.array(hr_img))
     print(f"PSNR: {psnr}")
 
 
 def process_input(lr_img,hr_img):
-    result_image_path = os.path.join('pred2/',os.path.basename(lr_img))
-    image = Image.open('data/lr_test/' + lr_img).convert('RGB')
+    result_image_path = os.path.join('data/paper_pics/preds3/',os.path.basename(lr_img))
+    image = Image.open('data/paper_pics/lr_test/' + lr_img).convert('RGB')
     sr_image = model.predict(np.array(image))
-    calc_snr_ssim(sr_image,hr_img)
+    calc_snr(sr_image,hr_img)
     sr_image.save(result_image_path)    
     print(f'Finished! Image saved to {result_image_path}')
 
 
 if __name__ == "__main__":
-    if args.use_single_img==False:
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('device:', device)
+    if args.use_single_img=="False":
         print("Testing on a set of images")
         if not args.model_path:
             print("Model path needs to be specified!")
@@ -64,8 +66,7 @@ if __name__ == "__main__":
         data = SRDataLoader(data_dir=args.data_dir, batch_size=1)
         data.setup('test')
 
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print('device:', device)
+
         model = RealESRGAN(device, scale=int(2))
         model.load_weights('models/epoch=18_2x.pth')
 
@@ -84,13 +85,12 @@ if __name__ == "__main__":
         print("Testing on a single image")
     
         # For testing on a single image
-        lr_img_name = 'interpolated_2.jpg'
-        hr_img_name = '180002.jpg'
-        test_lr_img = Image.open('data/lr_test/' + lr_img_name).convert('RGB')
-        test_hr_img = Image.open('data/test/' + hr_img_name).convert('RGB')
-        calc_snr_ssim(np.array(test_lr_img),np.array(test_hr_img))
-
-    
-
-   
-
+        model = RealESRGAN(device, scale=int(2))
+        model.load_weights('models/epoch=18_2x.pth')
+        lr_img_name = 'interpolated_9.jpg'
+        hr_img_name = '000009.jpg'
+        # test_lr_img = Image.open('data/paper_pics/lr_test/' + lr_img_name).convert('RGB')
+        test_hr_img = Image.open('data/paper_pics/lr_test/' + hr_img_name).convert('RGB')
+        process_input(lr_img_name,test_hr_img)
+        # calc_snr_ssim(np.array(test_lr_img),np.array(test_hr_img))
+        

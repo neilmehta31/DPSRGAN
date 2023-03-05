@@ -10,3 +10,4 @@ models/*
 preds/*
 preds2/*
 data.zip
+*.zip

@@ -52,8 +52,8 @@ class SRDataset(Dataset):
         lr_img = recursiveResize(img, 2)
         hr_img = img
         interpolated_img = self.setSize(lr_img)
-        # if save:
-        #     interpolated_img.save(f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
+        if save:
+            interpolated_img.save(f'C:/Work/Super-Resolution/data/paper_pics/lr_test/interpolated_{index}.jpg')
         lr_img, hr_img, interpolated_img = self.toTensor(
             lr_img), self.toTensor(hr_img), self.toTensor(interpolated_img)
         # interpolated_img = interpolated_img.reshape(128,128,3)
@@ -115,17 +115,18 @@ class SRDataLoader(LightningDataModule):
         elif stage == 'test':
             self.test = SRDataset(data_dir=self.test_dir,
                                   img_size=self.img_size)
-            # # print(len(self.test))
-            # for index in range(len(self.test)):
-            #     save = self.test.__getitem__(index,save = True)
+            print(len(self.test))
+            for index in range(len(self.test)):
+                save = self.test.__getitem__(index,save = True)
                 # interpolated_tensor_img = self.test.__getitem__(index)[2][0]
-                # save_image(interpolated_tensor_img, f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
+                # save_image(interpolated_tensor_img, f'C:/Work/Super-Resolution/data/paper_pics/interpolated_{index}.jpg')
             # for index,test_img in enumerate(self.test):
             #     print(index, test_img.__getitem__(index)[2])
             #     interpolated_tensor_img = test_img.__getitem__(index)[2]
             #     plt.imshow(interpolated_tensor_img[0])
             #     # interpolated_tensor_img.save(f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
             #     save_image(interpolated_tensor_img, f'C:/Work/Super-Resolution/data/lr_test/interpolated_{index}.jpg')
+            print("done")
 
     def train_dataloader(self, *args, **kwargs):
         return DataLoader(self.train, batch_size=self.batch_size, num_workers=4, drop_last=True,
